@@ -36,7 +36,6 @@ func (p *ReactParser) Scrape() {
 		if todayYear != itemYear ||
 			todayMonth != itemMonth ||
 			todayDay != itemDay {
-
 			break
 		}
 
