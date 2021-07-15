@@ -1,0 +1,8 @@
+version: "3.5"
+services:
+  api:
+    build: api
+    command: make run
+    working_dir: /go/src/api
+    volumes:
+      - ../:/go/src/api

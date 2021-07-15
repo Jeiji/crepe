@@ -1,0 +1,28 @@
+settings:
+  legacy:
+    force: true
+    interval: 1s
+schema:
+- name: verbot
+  path: .
+  commands:
+    build:
+      args:
+      - -v
+      - -o ./tmp/server
+      method: go build
+      status: true
+    run:
+      method: tmp/server
+      status: true
+  watcher:
+    extensions:
+    - go
+    paths:
+    - /
+    ignored_paths:
+    - .git
+    - .realize
+    - vendor
+    - server/web
+    - tmp
