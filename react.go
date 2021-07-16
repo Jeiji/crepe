@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mmcdole/gofeed"
+	"github.com/slack-go/slack"
 )
 
 type ReactParser struct {
@@ -39,7 +40,11 @@ func (p *ReactParser) Scrape() {
 			break
 		}
 
-		fmt.Println("Sent to Srack")
+		// fmt.Println("Sent to Srack")
+		slack.PostWebhook("https://hooks.slack.com/services/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", &slack.WebhookMessage{
+			Username: "Crépe",
+			Text:     item.Title,
+		})
 		fmt.Println(item.Title)
 
 	}
