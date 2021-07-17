@@ -1,16 +1,20 @@
 package main
-import  "vermont/crepes/*"
+
+import "crepe/crepes"
+
 
 func Crepe() {
-	rp := NewReactParser()
+	rp := crepes.NewReactParser()
 	rp.Scrape()
 
-	dep := NewDockerParser()
-	dep.Scrape()
+	ddwp := crepes.NewDockerDesktopWindowsParser()
+	ddwp.Scrape()
+
+	dddmp := crepes.NewDockerDesktopMacParser()
+	dddmp.Scrape()
 }
 
 func main() {
-
 
 	Crepe()
 	

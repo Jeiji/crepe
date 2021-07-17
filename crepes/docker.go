@@ -2,75 +2,93 @@ package crepes
 
 import (
 	"fmt"
+	"regexp"
 	"time"
+	"crepe/util"
+	"strconv"
 
 	"github.com/gocolly/colly"
-	"github.com/mmcdole/gofeed"
-	"github.com/slack-go/slack"
+	// "github.com/slack-go/slack"
+	
 )
 
 type DockerParser struct {
-	scraper *gofeed.Parser
+	scraper *colly.Collector
 	config  *DockerParserConfig
 }
 
 type DockerParserConfig struct {
+	tech string
 	URL string
 }
 
+func (p *DockerParser) CreateDate(s *string) {
+
+	yearRegex :=  regexp.MustCompile(`\d{4,}`)
+	monthRegex :=  regexp.MustCompile(`\d{4,4}-(\d{2,2})`)
+	dayRegex :=  regexp.MustCompile(`\d{2,}$`)
+
+	postYear, _ := strconv.Atoi(yearRegex.FindString(*s))
+	postMonth, _ := strconv.Atoi(monthRegex.FindStringSubmatch(*s)[1])
+	postDay, _ := strconv.Atoi(dayRegex.FindString(*s))
+
+
+	fmt.Println(util.TodayDay)
+
+	
+	if util.TodayYear == postYear ||
+			util.TodayMonth == time.Month(postMonth) ||
+			util.TodayDay == postDay {
+		}
+
+	// fmt.Println(time.Parse("0000-00-00", *s))
+}
+
+
 func (p *DockerParser) Scrape() {
 
-	c := colly.NewCollector()
-
-	// Find and visit all links
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+	p.scraper.OnHTML("h2 ~ p", func(e *colly.HTMLElement) {
 		// e.Request.Visit(e.Attr("href"))
-		fmt.Println("THE HREF", e)
+		fmt.Println("THE SELECTION ", e.Text)
+
+		dateRegexp :=  regexp.MustCompile(`^\d{4,}-\d{2,}-\d{2,}$`)
+
+		if dateRegexp.MatchString(e.Text) {
+			p.CreateDate(&e.Text)
+		}
+
+
 	})
 
-	c.OnRequest(func(r *colly.Request) {
+	p.scraper.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL)
 	})
 
-	c.Visit("http://go-colly.org/")
+	p.scraper.Visit(p.config.URL)
 
-	feed, _ := p.scraper.ParseURL(p.config.URL)
-	// fmt.Printf("+%v", feed)
-	for _, item := range feed.Items {
+	// Send to Slack
 
-		// today := time.Now()
-		today := time.Date(2021, time.June, 8, 0, 0, 0, 0, time.Local)
-
-		t := item.PublishedParsed
-
-		if item.UpdatedParsed != nil {
-			t = item.UpdatedParsed
-		}
-
-		todayYear, todayMonth, todayDay := today.Date()
-		itemYear, itemMonth, itemDay := t.Date()
-
-		if todayYear != itemYear ||
-			todayMonth != itemMonth ||
-			todayDay != itemDay {
-			break
-		}
-
-		// fmt.Println("Sent to Srack")
-		slack.PostWebhook("https://hooks.slack.com/services/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", &slack.WebhookMessage{
-			Username: "Crépe",
-			Text:     item.Title,
-		})
-		fmt.Println(item.Title)
-
-	}
 }
 
-func NewDockerParser() *DockerParser {
+func NewDockerDesktopWindowsParser() *DockerParser {
 	return &DockerParser{
-		scraper: gofeed.NewParser(),
+		scraper: colly.NewCollector(),
 		config: &DockerParserConfig{
-			URL: "https://reactjs.org/feed.xml",
+			URL: "https://docs.docker.com/docker-for-windows/release-notes/",
+			tech: "Docker Desktop (Windows)",
 		},
 	}
 }
+
+func NewDockerDesktopMacParser() *DockerParser {
+	return &DockerParser{
+		scraper: colly.NewCollector(),
+		config: &DockerParserConfig{
+			URL: "https://docs.docker.com/docker-for-mac/release-notes/",
+			tech: "Docker Desktop (Mac)",
+		},
+	} 
+}
+
+
+

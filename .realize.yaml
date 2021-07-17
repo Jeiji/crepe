@@ -3,7 +3,7 @@ settings:
     force: true
     interval: 1s
 schema:
-- name: verbot
+- name: crepe
   path: .
   commands:
     build:
