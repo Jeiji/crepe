@@ -1,8 +1,13 @@
 version: "3.5"
 services:
-  api:
-    build: api
+  crepe-app:
+    env_file: 
+      - ../.env
+    build: build
     command: make run
-    working_dir: /go/src/api
+    working_dir: /go/src/crepe
     volumes:
-      - ../:/go/src/api
+      - ../:/go/src/crepe
+  crepe-redis:
+    image: redis
+    command: redis-server --appendonly yes

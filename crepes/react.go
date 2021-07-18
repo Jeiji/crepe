@@ -1,8 +1,8 @@
 package crepes
 
 import (
+	"crepe/util"
 	"fmt"
-	"time"
 
 	"github.com/mmcdole/gofeed"
 	"github.com/slack-go/slack"
@@ -22,21 +22,15 @@ func (p *ReactParser) Scrape() {
 	// fmt.Printf("+%v", feed)
 	for _, item := range feed.Items {
 
-		today := time.Now()
-		// today := time.Date(2021, time.June, 8, 0, 0, 0, 0, time.Local)
-
 		t := item.PublishedParsed
 
 		if item.UpdatedParsed != nil {
 			t = item.UpdatedParsed
 		}
 
-		todayYear, todayMonth, todayDay := today.Date()
 		itemYear, itemMonth, itemDay := t.Date()
 
-		if todayYear != itemYear ||
-			todayMonth != itemMonth ||
-			todayDay != itemDay {
+		if !util.IsToday(itemYear, int(itemMonth), itemDay) {
 			break
 		}
 
