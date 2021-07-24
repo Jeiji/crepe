@@ -1,10 +1,12 @@
 package util
 
-import "time"
+import (
+	"time"
+)
 
 var Test = false
 
-func IsToday(year int, month int, day int) bool {
+func IsToday(year int, month int, day int, crepe string) bool {
 	var Today time.Time
 	if Test {
 		return true

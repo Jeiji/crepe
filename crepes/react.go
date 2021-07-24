@@ -14,7 +14,8 @@ type ReactParser struct {
 }
 
 type ReactParserConfig struct {
-	URL string
+	URL  string
+	Tech string
 }
 
 func (p *ReactParser) Scrape() {
@@ -30,7 +31,8 @@ func (p *ReactParser) Scrape() {
 
 		itemYear, itemMonth, itemDay := t.Date()
 
-		if !util.IsToday(itemYear, int(itemMonth), itemDay) {
+		if !util.IsToday(itemYear, int(itemMonth), itemDay, p.config.Tech) {
+			fmt.Println("[ DONE ] React already up to date")
 			break
 		}
 
@@ -48,7 +50,8 @@ func NewReactParser() *ReactParser {
 	return &ReactParser{
 		scraper: gofeed.NewParser(),
 		config: &ReactParserConfig{
-			URL: "https://reactjs.org/feed.xml",
+			URL:  "https://reactjs.org/feed.xml",
+			Tech: "React",
 		},
 	}
 }

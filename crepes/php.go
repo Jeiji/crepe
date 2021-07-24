@@ -19,7 +19,7 @@ type PHPParser struct {
 }
 
 type PHPParserConfig struct {
-	tech string
+	Tech string
 	URL  string
 }
 
@@ -30,8 +30,7 @@ func (p *PHPParser) CheckDate(s *string) bool {
 
 	postYear, postMonth, postDay := parsedDate.Date()
 
-	if util.IsToday(postYear, int(postMonth), postDay) {
-		fmt.Println("OKAY")
+	if util.IsToday(postYear, int(postMonth), postDay, p.config.Tech) {
 		return true
 	}
 
@@ -39,6 +38,7 @@ func (p *PHPParser) CheckDate(s *string) bool {
 }
 
 func (p *PHPParser) Scrape() {
+	var somethingNew bool
 
 	p.scraper.OnHTML("li", func(e *colly.HTMLElement) {
 		// e.Request.Visit(e.Attr("href"))
@@ -48,10 +48,11 @@ func (p *PHPParser) Scrape() {
 
 		if dateRegexp.MatchString(e.Text) {
 			if p.CheckDate(&e.Text) {
+				somethingNew = true
 				// Send to Slack
 				slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
 					Username: "Crépe",
-					Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
+					Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.Tech, *e),
 				})
 
 			}
@@ -65,6 +66,10 @@ func (p *PHPParser) Scrape() {
 
 	p.scraper.Visit(p.config.URL)
 
+	if !somethingNew {
+		fmt.Printf("[ DONE ] %s has had no new updates.\n", p.config.Tech)
+	}
+
 }
 
 func NewPHPParser() *PHPParser {
@@ -72,7 +77,7 @@ func NewPHPParser() *PHPParser {
 		scraper: colly.NewCollector(),
 		config: &PHPParserConfig{
 			URL:  "https://www.php.net/releases/index.php",
-			tech: "PHP",
+			Tech: "PHP",
 		},
 	}
 }

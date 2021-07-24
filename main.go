@@ -12,11 +12,15 @@ type Crepe interface {
 func CrepeItUp() {
 
 	crepes := []Crepe{
-		// crepes.NewReactParser(),
-		// crepes.NewDockerDesktopWindowsParser(),
-		// crepes.NewDockerDesktopMacParser(),
-		// crepes.NewPHPParser(),
+		crepes.NewReactParser(),
+		crepes.NewDockerDesktopWindowsParser(),
+		crepes.NewDockerDesktopMacParser(),
+		crepes.NewPHPParser(),
 		crepes.NewLumenParser(),
+		crepes.NewLaravelParser(),
+		crepes.NewVueParser(),
+		crepes.NewNextjsParser(),
+		crepes.NewNuxtjsParser(),
 	}
 
 	var wg sync.WaitGroup

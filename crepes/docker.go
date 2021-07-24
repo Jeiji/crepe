@@ -18,11 +18,11 @@ type DockerParser struct {
 }
 
 type DockerParserConfig struct {
-	tech string
+	Tech string
 	URL  string
 }
 
-func (p *DockerParser) CreateDate(s *string) bool {
+func (p *DockerParser) CheckDate(s *string) bool {
 
 	yearRegex := regexp.MustCompile(`\d{4,}`)
 	monthRegex := regexp.MustCompile(`\d{4,4}-(\d{2,2})`)
@@ -32,9 +32,7 @@ func (p *DockerParser) CreateDate(s *string) bool {
 	postMonth, _ := strconv.Atoi(monthRegex.FindStringSubmatch(*s)[1])
 	postDay, _ := strconv.Atoi(dayRegex.FindString(*s))
 
-	if util.IsToday(postYear, postMonth, postDay) {
-		fmt.Println("OKAY")
-
+	if util.IsToday(postYear, postMonth, postDay, p.config.Tech) {
 		// fmt.Println(util.TodayDay)
 
 		// fmt.Println(time.Parse("0000-00-00", *s))
@@ -46,6 +44,8 @@ func (p *DockerParser) CreateDate(s *string) bool {
 
 func (p *DockerParser) Scrape() {
 
+	var somethingNew bool
+
 	p.scraper.OnHTML("h2 ~ p", func(e *colly.HTMLElement) {
 		// e.Request.Visit(e.Attr("href"))
 		// fmt.Println("THE SELECTION ", e.Text)
@@ -53,11 +53,12 @@ func (p *DockerParser) Scrape() {
 		dateRegexp := regexp.MustCompile(`^\d{4,}-\d{2,}-\d{2,}$`)
 
 		if dateRegexp.MatchString(e.Text) {
-			if p.CreateDate(&e.Text) {
+			if p.CheckDate(&e.Text) {
+				somethingNew = true
 				// Send to Slack
 				slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
 					Username: "Crépe",
-					Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
+					Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.Tech, *e),
 				})
 			}
 		}
@@ -70,6 +71,10 @@ func (p *DockerParser) Scrape() {
 
 	p.scraper.Visit(p.config.URL)
 
+	if !somethingNew {
+		fmt.Printf("[ DONE ] %s has had no new updates.\n", p.config.Tech)
+	}
+
 }
 
 func NewDockerDesktopWindowsParser() *DockerParser {
@@ -77,7 +82,7 @@ func NewDockerDesktopWindowsParser() *DockerParser {
 		scraper: colly.NewCollector(),
 		config: &DockerParserConfig{
 			URL:  "https://docs.docker.com/docker-for-windows/release-notes/",
-			tech: "Docker Desktop (Windows)",
+			Tech: "Docker Desktop (Windows)",
 		},
 	}
 }
@@ -87,7 +92,7 @@ func NewDockerDesktopMacParser() *DockerParser {
 		scraper: colly.NewCollector(),
 		config: &DockerParserConfig{
 			URL:  "https://docs.docker.com/docker-for-mac/release-notes/",
-			tech: "Docker Desktop (Mac)",
+			Tech: "Docker Desktop (Mac)",
 		},
 	}
 }
