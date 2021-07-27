@@ -2,7 +2,6 @@ package crepes
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"crepe/util"
 
 	"github.com/gocolly/colly"
-	"github.com/slack-go/slack"
 )
 
 type PHPParser struct {
@@ -50,10 +48,12 @@ func (p *PHPParser) Scrape() {
 			if p.CheckDate(&e.Text) {
 				somethingNew = true
 				// Send to Slack
-				slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
-					Username: "Crépe",
-					Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.Tech, *e),
-				})
+				util.SendNewSlackWebhook(p.config.Tech, p.config.URL, "")
+
+				// slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
+				// 	Username: "Crépe",
+				// 	Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.Tech, *e),
+				// })
 
 			}
 		}

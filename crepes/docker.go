@@ -2,14 +2,12 @@ package crepes
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 
 	"crepe/util"
 	"strconv"
 
 	"github.com/gocolly/colly"
-	"github.com/slack-go/slack"
 )
 
 type DockerParser struct {
@@ -32,14 +30,9 @@ func (p *DockerParser) CheckDate(s *string) bool {
 	postMonth, _ := strconv.Atoi(monthRegex.FindStringSubmatch(*s)[1])
 	postDay, _ := strconv.Atoi(dayRegex.FindString(*s))
 
-	if util.IsToday(postYear, postMonth, postDay, p.config.Tech) {
-		// fmt.Println(util.TodayDay)
+	return util.IsToday(postYear, postMonth, postDay, p.config.Tech)
 
-		// fmt.Println(time.Parse("0000-00-00", *s))
-		return true
-	}
-
-	return false
+	// return false
 }
 
 func (p *DockerParser) Scrape() {
@@ -56,10 +49,13 @@ func (p *DockerParser) Scrape() {
 			if p.CheckDate(&e.Text) {
 				somethingNew = true
 				// Send to Slack
-				slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
-					Username: "Crépe",
-					Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.Tech, *e),
-				})
+				util.SendNewSlackWebhook(p.config.Tech, p.config.URL, "")
+				fmt.Println("[ NEW ] (Docker)")
+
+				// slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
+				// 	Username: "Crépe",
+				// 	Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.Tech, *e),
+				// })
 			}
 		}
 

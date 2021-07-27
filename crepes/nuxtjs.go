@@ -2,12 +2,11 @@ package crepes
 
 import (
 	"crepe/storage"
+	"crepe/util"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gocolly/colly"
-	"github.com/slack-go/slack"
 )
 
 type NuxtjsParser struct {
@@ -21,9 +20,12 @@ type NuxtjsParserConfig struct {
 }
 
 func (p *NuxtjsParser) Scrape() {
+	test := false
 
 	p.scraper.OnHTML("div.release-entry:first-of-type > div > div > div > div > div > a", func(e *colly.HTMLElement) {
-
+		if test {
+			storage.Set("NuxtjsVersion", "")
+		}
 		redisNuxtjsVersion, err := storage.Get("NuxtjsVersion")
 		if err == nil {
 			fmt.Println("This is in the Nuxtjs bank: ", redisNuxtjsVersion)
@@ -39,10 +41,12 @@ func (p *NuxtjsParser) Scrape() {
 			storage.Set("NuxtjsVersion", justTheVersion)
 			fmt.Println("[ NEW ] (Nuxtjs) What went in: ", justTheVersion)
 
-			slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
-				Username: "Crépe",
-				Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
-			})
+			util.SendNewSlackWebhook(p.config.tech, p.config.URL, justTheVersion)
+
+			// slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
+			// 	Username: "Crépe",
+			// 	Text:     fmt.Sprintf("*%sクレープ一枚お待たせ！*\nバージョン: %s.\n詳しくは", p.config.tech, justTheVersion),
+			// })
 		}
 
 	})

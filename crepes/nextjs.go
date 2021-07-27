@@ -2,12 +2,11 @@ package crepes
 
 import (
 	"crepe/storage"
+	"crepe/util"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gocolly/colly"
-	"github.com/slack-go/slack"
 )
 
 type NextjsParser struct {
@@ -39,10 +38,12 @@ func (p *NextjsParser) Scrape() {
 			storage.Set("NextjsVersion", justTheVersion)
 			fmt.Println("[ NEW ] (NextJS) What went in: ", justTheVersion)
 
-			slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
-				Username: "Crépe",
-				Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
-			})
+			util.SendNewSlackWebhook(p.config.tech, p.config.URL, justTheVersion)
+
+			// slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
+			// 	Username: "Crépe",
+			// 	Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
+			// })
 		}
 
 	})

@@ -2,12 +2,11 @@ package crepes
 
 import (
 	"crepe/storage"
+	"crepe/util"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gocolly/colly"
-	"github.com/slack-go/slack"
 )
 
 type LumenParser struct {
@@ -37,10 +36,12 @@ func (p *LumenParser) Scrape() {
 			fmt.Println("lumen set error: ", lumenSet)
 			fmt.Println("What went into lumenVersion: ", justTheVersion)
 
-			slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
-				Username: "Crépe",
-				Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
-			})
+			util.SendNewSlackWebhook(p.config.tech, p.config.URL, justTheVersion)
+
+			// slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
+			// 	Username: "Crépe",
+			// 	Text:     fmt.Sprintf("This is new %s info. Title: %v.", p.config.tech, *e),
+			// })
 		}
 
 	})
