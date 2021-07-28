@@ -3,6 +3,8 @@ package main
 import (
 	"crepe/crepes"
 	"sync"
+
+	"github.com/robfig/cron"
 )
 
 type Crepe interface {
@@ -37,6 +39,9 @@ func CrepeItUp() {
 
 func main() {
 
-	CrepeItUp()
+	c := cron.New()
+	c.AddFunc("@hourly", func() {
+		CrepeItUp()
+	})
 
 }
