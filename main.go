@@ -2,7 +2,11 @@ package main
 
 import (
 	"crepe/crepes"
+	"fmt"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/robfig/cron"
 )
@@ -39,9 +43,18 @@ func CrepeItUp() {
 
 func main() {
 
+	done := make(chan os.Signal, 1)
+
+	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+
 	c := cron.New()
-	c.AddFunc("@hourly", func() {
+	c.AddFunc("@every 1hr", func() {
 		CrepeItUp()
 	})
+	c.Start()
+
+	fmt.Println("\n\nAwaiting Signal...")
+	<-done
+	fmt.Println("\n\nExiting...")
 
 }
