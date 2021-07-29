@@ -48,7 +48,7 @@ func main() {
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 
 	c := cron.New()
-	c.AddFunc("@every 1hr", func() {
+	c.AddFunc("0 0 */1 * * *", func() {
 		CrepeItUp()
 	})
 	c.Start()
