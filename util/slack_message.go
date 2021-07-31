@@ -79,3 +79,33 @@ func SendNewSlackWebhook(pName string, pURL string, newVersion string) {
 	},
 	)
 }
+
+func SendNewSlackNotification(header string, body string, tech string) {
+
+	crepeHeader := SlackCrepe{
+		Type: "header",
+		Text: SlackCrepeField{
+			Type: "plain_text",
+			Text: header,
+		},
+	}
+
+	crepeBody := SlackCrepe{
+		Type: "section",
+		Text: SlackCrepeField{
+			Type: "mrkdwn",
+			Text: body,
+		},
+	}
+
+	slack.PostWebhook(os.Getenv("SLACK_HOOK_URL"), &slack.WebhookMessage{
+		Username: "Crépe",
+		Blocks: &slack.Blocks{
+			BlockSet: []slack.Block{
+				crepeHeader,
+				crepeBody,
+			},
+		},
+	},
+	)
+}
